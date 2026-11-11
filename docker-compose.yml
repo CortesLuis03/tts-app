@@ -1,0 +1,37 @@
+# Despliegue detrás de Traefik (versión probada en el VPS).
+# Requiere una red externa de Traefik llamada "proxy" y un .env con OPENROUTER_API_KEY y TTS_BASIC_AUTH.
+services:
+  tts:
+    # Con TTS_IMAGE=usuario/tts-app:latest se usa la imagen del registro; si no, se construye localmente.
+    image: ${TTS_IMAGE:-tts-app:latest}
+    build: .
+    container_name: tts-app
+    restart: unless-stopped
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - MAX_TEXT_CHARS=${MAX_TEXT_CHARS:-20000}
+      - MODELO_POR_DEFECTO=${MODELO_POR_DEFECTO:-elevenlabs/eleven-multilingual-v2}
+    ports:
+      # Acceso directo por el puerto 9002; por defecto solo en localhost (no pasa por el basic auth de Traefik).
+      - "${TTS_BIND:-127.0.0.1}:9002:8000"
+    volumes:
+      - tts_previews:/srv/previews
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.tts.rule=Host(`tts-app.dev-labenginnering.com`)"
+      - "traefik.http.routers.tts.entrypoints=websecure"
+      - "traefik.http.routers.tts.tls=true"
+      - "traefik.http.routers.tts.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.tts.middlewares=tts-auth"
+      - "traefik.http.middlewares.tts-auth.basicauth.users=${TTS_BASIC_AUTH}"
+      - "traefik.http.services.tts.loadbalancer.server.port=8000"
+
+volumes:
+  tts_previews:
+
+networks:
+  proxy:
+    external: true

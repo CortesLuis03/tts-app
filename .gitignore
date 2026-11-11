@@ -1,0 +1,10 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+history.db
+data/
+previews/
+server.log
+*.mp3

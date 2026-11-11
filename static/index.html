@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voz — Texto a voz</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" aria-label="Principal">
+      <div class="brand"><span class="logo" aria-hidden="true">◖◗</span> Voz</div>
+      <button class="nav-item active" data-view="tts" type="button">Texto a voz</button>
+      <button class="nav-item" data-view="history" type="button">Historial <span id="history-badge" class="badge" hidden></span></button>
+      <div class="spacer"></div>
+      <button id="theme-toggle" class="nav-item" type="button">◐ Cambiar tema</button>
+    </nav>
+
+    <section class="view" id="view-tts">
+      <header class="view-head">Texto a voz</header>
+      <div id="banner" class="banner" role="alert" hidden></div>
+
+      <div class="workspace">
+        <div class="editor">
+          <textarea id="text" placeholder="Escribe o pega aquí el texto que quieres convertir en voz…"></textarea>
+          <div id="error" class="error" role="alert" hidden></div>
+          <div id="result" class="result" hidden>
+            <div id="player"></div>
+          </div>
+          <div class="bottombar">
+            <span class="hint" id="chunk-hint"></span>
+            <span class="counter" id="counter">0 / 0</span>
+            <button id="download-last" class="icon-btn" type="button" title="Descargar último audio" aria-label="Descargar último audio" disabled>⬇</button>
+            <button id="generate" class="primary" type="button">Generar audio</button>
+          </div>
+        </div>
+
+        <aside class="settings" aria-label="Ajustes">
+          <div class="field">
+            <label for="model">Modelo</label>
+            <select id="model"></select>
+          </div>
+          <div class="field">
+            <label for="voice">Voz</label>
+            <select id="voice" hidden></select>
+            <ul id="voice-list" class="voice-list" role="radiogroup" aria-label="Voces"></ul>
+            <input id="voice-text" type="text" placeholder="ID de la voz" hidden>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="speed">Velocidad</label>
+              <output id="speed-out" for="speed">1.00×</output>
+            </div>
+            <input id="speed" type="range" min="0.25" max="4" step="0.05" value="1">
+            <div class="range-ends"><span>Más lento</span><span>Más rápido</span></div>
+          </div>
+          <div id="eleven-opts" class="eleven-opts" hidden>
+            <div class="field">
+              <div class="field-head"><label for="stability">Estabilidad</label><output id="stability-out" for="stability">0.50</output></div>
+              <input id="stability" type="range" min="0" max="1" step="0.01" value="0.5">
+              <div class="range-ends"><span>Más variable</span><span>Más estable</span></div>
+            </div>
+            <div class="field">
+              <div class="field-head"><label for="similarity">Similitud</label><output id="similarity-out" for="similarity">0.75</output></div>
+              <input id="similarity" type="range" min="0" max="1" step="0.01" value="0.75">
+              <div class="range-ends"><span>Baja</span><span>Alta</span></div>
+            </div>
+            <div class="field">
+              <div class="field-head"><label for="style">Exageración de estilo</label><output id="style-out" for="style">0.00</output></div>
+              <input id="style" type="range" min="0" max="1" step="0.01" value="0">
+              <div class="range-ends"><span>Ninguno</span><span>Exagerado</span></div>
+            </div>
+            <div class="field">
+              <label for="language">Idioma</label>
+              <select id="language">
+                <option value="">Automático</option>
+                <option value="es">Español</option>
+                <option value="en">Inglés</option>
+                <option value="pt">Portugués</option>
+                <option value="fr">Francés</option>
+                <option value="de">Alemán</option>
+                <option value="it">Italiano</option>
+              </select>
+              <span class="hint">Si un modelo no admite fijar idioma, déjalo en Automático.</span>
+            </div>
+            <label class="switch-row" for="boost"><span>Aumento de altavoz</span><input id="boost" type="checkbox" checked></label>
+          </div>
+          <div class="field">
+            <label for="instructions">Instrucciones de estilo <span class="opt">(opcional)</span></label>
+            <textarea id="instructions" rows="3" maxlength="500" placeholder="Ej.: voz cálida y pausada, tono alegre"></textarea>
+            <span class="hint">Solo para modelos que lo soporten.</span>
+          </div>
+          <div class="field">
+            <label for="limit">Límite de caracteres</label>
+            <input id="limit" type="number" min="1" step="100">
+          </div>
+          <div class="field">
+            <label>Formato de salida</label>
+            <div class="static-value">MP3</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-history" hidden>
+      <header class="view-head">Historial <span class="hint" id="history-count"></span></header>
+      <p class="hint pad">Guardado en este navegador (IndexedDB). Si borras los datos del sitio, se pierde.</p>
+      <ul id="history-list" class="history-list"></ul>
+      <p id="history-empty" class="hint pad" hidden>Todavía no has generado nada.</p>
+    </section>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
