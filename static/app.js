@@ -11,7 +11,15 @@ const els = {
   theme: $("theme-toggle"),
 };
 const isEleven = () => els.model.value.startsWith("elevenlabs/");
-const syncEleven = () => { $("eleven-opts").hidden = !isEleven(); };
+const syncEleven = () => {
+  $("eleven-opts").hidden = !isEleven();
+  // ElevenLabs solo admite velocidad de 0.7 a 1.2; el resto de modelos, de 0.25 a 4
+  const sp = els.speed;
+  sp.min = isEleven() ? "0.7" : "0.25";
+  sp.max = isEleven() ? "1.2" : "4";
+  sp.value = Math.min(Math.max(parseFloat(sp.value), parseFloat(sp.min)), parseFloat(sp.max));
+  els.speedOut.textContent = `${parseFloat(sp.value).toFixed(2)}×`;
+};
 const state = { models: [], serverMax: 20000, chunk: 3000, lastItem: null, mainPlayer: null, histPlayers: [] };
 
 /* ---------- IndexedDB ---------- */
@@ -298,6 +306,11 @@ async function generate() {
     state.mainPlayer = wavePlayer(blob);
     els.player.replaceChildren(state.mainPlayer.el);
     els.result.hidden = false;
+    const used = [`voz ${voice}`, `velocidad ${item.speed.toFixed(2)}×`];
+    if (isEleven()) used.push(`estabilidad ${$("stability").value}`, `similitud ${$("similarity").value}`,
+      `estilo ${$("style").value}`, `idioma ${$("language").value || "auto"}`,
+      `altavoz ${$("boost").checked ? "sí" : "no"}`);
+    $("result-info").textContent = `Generado con: ${used.join(" · ")}`;
     els.downloadLast.disabled = false;
     state.mainPlayer.play();
     refreshBadge();
