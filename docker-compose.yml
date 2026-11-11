@@ -21,21 +21,23 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
-      - "traefik.http.routers.tts.rule=Host(`tts-app.dev-labenginnering.com`)"
-      - "traefik.http.routers.tts.entrypoints=websecure"
-      - "traefik.http.routers.tts.tls=true"
-      - "traefik.http.routers.tts.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.tts.middlewares=tts-auth"
+      # La página y /static son públicas (así WhatsApp, Telegram, etc. pueden leer la vista previa).
+      # Solo /api, lo que gasta créditos de OpenRouter, pide usuario y contraseña.
+      - "traefik.http.routers.tts-public.rule=Host(`tts-app.dev-labenginnering.com`)"
+      - "traefik.http.routers.tts-public.priority=10"
+      - "traefik.http.routers.tts-public.entrypoints=websecure"
+      - "traefik.http.routers.tts-public.tls=true"
+      - "traefik.http.routers.tts-public.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.tts-public.service=tts"
+      - "traefik.http.routers.tts-api.rule=Host(`tts-app.dev-labenginnering.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.tts-api.priority=20"
+      - "traefik.http.routers.tts-api.entrypoints=websecure"
+      - "traefik.http.routers.tts-api.tls=true"
+      - "traefik.http.routers.tts-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.tts-api.middlewares=tts-auth"
+      - "traefik.http.routers.tts-api.service=tts"
       - "traefik.http.middlewares.tts-auth.basicauth.users=${TTS_BASIC_AUTH}"
       - "traefik.http.services.tts.loadbalancer.server.port=8000"
-      # Vista previa al compartir: los rastreadores (WhatsApp, Telegram…) no pueden pasar el basic auth.
-      # Este router sin auth solo les sirve la página y /static; la API sigue protegida.
-      - "traefik.http.routers.tts-preview.rule=Host(`tts-app.dev-labenginnering.com`) && (Path(`/`) || PathPrefix(`/static`)) && HeaderRegexp(`User-Agent`, `(?i)(whatsapp|facebookexternalhit|telegrambot|twitterbot|slackbot|linkedinbot|discordbot|skypeuripreview)`)"
-      - "traefik.http.routers.tts-preview.priority=100"
-      - "traefik.http.routers.tts-preview.entrypoints=websecure"
-      - "traefik.http.routers.tts-preview.tls=true"
-      - "traefik.http.routers.tts-preview.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.tts-preview.service=tts"
 
 volumes:
   tts_previews:
